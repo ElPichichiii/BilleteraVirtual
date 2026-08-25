@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../BilleteraVirtual.Tests/BilleteraVirtual.Tests.csproj" Id="a090fb63-6272-40d9-bbb8-57db6a19442c" />
+  <Project Path="BilleteraVirtual.csproj" />
+</Solution>
