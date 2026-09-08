@@ -112,3 +112,91 @@ La abstracción `AbstracBilletera` define la interfaz de ejecución de operacion
 * **`Transferencias`**: Valida saldo en la cuenta origen y acredita en una cuenta destino distinta de forma atómica.
 * **`Deposito`**: Valida credenciales e interactúa con medios de ingreso externos (tarjeta/banco) para incrementar el saldo de una sola cuenta.
 * **`Retiro`**: Valida saldo disponible y límites de extracción para egresar dinero a un canal externo.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Diagrama de Secuencia: Flujo de Transferencia
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Usuario (Origen)
+    participant B as BilleteraVirtual
+    participant G as GestorTransferencias
+    participant T as Transferencia
+    participant CO as Cuenta (Origen)
+    participant CD as Cuenta (Destino)
+
+    U->>B: RealizarTransferencia(dniDestino, monto)
+    activate B
+
+    B->>G: RealizarTransferencia(cuentaOrigen, cuentaDestino, monto)
+    activate G
+
+    G->>T: Crear(cuentaOrigen, cuentaDestino, monto)
+    activate T
+
+    G->>T: Validar()
+    
+    %% Autodelegaciones obligatorias de validación
+    T->>T: ValidarLimite(monto)
+    T->>T: ValidarSaldo(cuentaOrigen, monto)
+    T->>T: ValidarDestino(cuentaDestino)
+
+    alt Destino inválido
+        T-->>G: Validación fallida (Destino no existe o inactivo)
+        G-->>B: Error: Cuenta destino inválida
+        B-->>U: Muestra mensaje de error
+    else Saldo insuficiente
+        T-->>G: Validación fallida (Fondos insuficientes)
+        G-->>B: Error: Saldo insuficiente
+        B-->>U: Muestra mensaje de error
+    else Límite superado
+        T-->>G: Validación fallida (Monto supera el límite diario)
+        G-->>B: Error: Límite de transferencia superado
+        B-->>U: Muestra mensaje de error
+    else Todo válido (Monto dentro del límite, Saldo suficiente y Destino válido)
+        T-->>G: Validación exitosa
+
+        G->>T: Ejecutar()
+
+        %% Autodelegación para debitar el monto
+        T->>T: DebitarMonto(cuentaOrigen, monto)
+        T->>CO: Debitar(monto)
+        activate CO
+        CO->>CO: Restar saldo
+        CO->>CO: Registrar Movimiento (Egreso)
+        CO-->>T: OK
+        deactivate CO
+
+        T->>CD: Acreditar(monto)
+        activate CD
+        CD->>CD: Sumar saldo
+        CD->>CD: Registrar Movimiento (Ingreso)
+        CD-->>T: OK
+        deactivate CD
+
+        %% Registro de la transferencia en historiales
+        T->>G: RegistrarEnHistorial(this)
+        T-->>G: Transferencia completada
+        deactivate T
+
+        G-->>B: Operación exitosa
+        deactivate G
+
+        B-->>U: Confirmación de transferencia
+        deactivate B
+    end
+```
