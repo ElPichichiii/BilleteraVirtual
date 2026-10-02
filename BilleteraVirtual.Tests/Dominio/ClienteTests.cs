@@ -62,4 +62,18 @@ public class ClienteTests
 
         Assert.Equal("email", excepcion.ParamName);
     }
+
+    [Theory]
+    [InlineData("email-invalido")]
+    [InlineData("ana@")]
+    [InlineData("@email.com")]
+    [InlineData("ana email@email.com")]
+    public void CrearCliente_ConEmailInvalido_LanzaArgumentException(string email)
+    {
+        var excepcion = Assert.Throws<ArgumentException>(
+            () => new Cliente(1, "Ana Pérez", "12345678", email));
+
+        Assert.Equal("email", excepcion.ParamName);
+    }
 }
+

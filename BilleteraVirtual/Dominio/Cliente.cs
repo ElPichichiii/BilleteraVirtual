@@ -1,3 +1,5 @@
+using System.Net.Mail;
+
 namespace BilleteraVirtual.Dominio;
 
 public class Cliente
@@ -14,6 +16,7 @@ public class Cliente
         ValidarDatoObligatorio(nombre, nameof(nombre));
         ValidarDatoObligatorio(dni, nameof(dni));
         ValidarDatoObligatorio(email, nameof(email));
+        ValidarFormatoEmail(email);
 
         Id = id;
         Nombre = nombre;
@@ -34,4 +37,14 @@ public class Cliente
             throw new ArgumentException("El dato es obligatorio.", nombreParametro);
         }
     }
+
+    private static void ValidarFormatoEmail(string email)
+    {
+        if (!MailAddress.TryCreate(email, out var direccion) ||
+            direccion.Address != email)
+        {
+            throw new ArgumentException("El email tiene un formato inválido.", nameof(email));
+        }
+    }
 }
+
