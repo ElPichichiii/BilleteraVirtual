@@ -11,4 +11,16 @@ public class BilleteraTests
 
         Assert.Equal(0m, billetera.ConsultarSaldo());
     }
+
+    [Fact]
+    public void ConsultarSaldo_AlConsultarloDosVeces_NoModificaSaldo()
+    {
+        var billetera = new Billetera();
+
+        var saldoPrimeraConsulta = billetera.ConsultarSaldo();
+        var saldoSegundaConsulta = billetera.ConsultarSaldo();
+
+        Assert.Equal(saldoPrimeraConsulta, saldoSegundaConsulta);
+    }
 }
+
