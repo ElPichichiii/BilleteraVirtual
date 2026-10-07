@@ -22,5 +22,39 @@ public class BilleteraTests
 
         Assert.Equal(saldoPrimeraConsulta, saldoSegundaConsulta);
     }
+
+    [Fact]
+    public void RetirarSaldo_MontoValidoYSaldoSuficiente_RestaElSaldo()
+    {
+        var billetera = new Billetera();
+        billetera.DepositarSaldo(1000m);
+
+        billetera.RetirarSaldo(400m);
+
+        Assert.Equal(600m, billetera.ConsultarSaldo());
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-50)]
+    public void RetirarSaldo_MontoMenorOIgualACero_LanzaArgumentException(decimal montoInvalido)
+    {
+        var billetera = new Billetera();
+
+        Assert.Throws<ArgumentException>(() => billetera.RetirarSaldo(montoInvalido));
+    }
+
+    [Fact]
+    public void RetirarSaldo_MontoMayorAlSaldo_LanzaInvalidOperationException()
+    {
+        var billetera = new Billetera();
+        billetera.DepositarSaldo(200m);
+
+        Assert.Throws<InvalidOperationException>(() => billetera.RetirarSaldo(500m));
+    }
+
+
+
+
 }
 
