@@ -3,10 +3,12 @@ namespace BilleteraVirtual.Dominio;
 public class Billetera
 {
     private decimal saldo;
+    private readonly HistorialMovimientos historial;
 
     public Billetera()
     {
         saldo = 0m;
+        historial = new HistorialMovimientos();
     }
 
     public decimal ConsultarSaldo()
@@ -14,28 +16,26 @@ public class Billetera
         return saldo;
     }
 
-    public void DepositarSaldo(decimal monto)
+    public void CargarDinero(decimal monto)
     {
-        if (monto <= 0)
+        int id = historial.ObtenerMovimientos().Count + 1;
+        var carga = new Carga(id, monto, this);
 
-        {
-            throw new ArgumentException("El monto a depositar debe ser mayor a 0");
-        }
+        carga.Ejecutar();
+    }
 
+    public List<Movimiento> ObtenerMovimientos()
+    {
+        return historial.ObtenerMovimientos();
+    }
+
+    internal void Acreditar(decimal monto)
+    {
         saldo += monto;
     }
 
-    public void RetirarSaldo(decimal monto)
+    internal void RegistrarMovimiento(Movimiento movimiento)
     {
-        if (monto <= 0) 
-        {
-            throw new ArgumentException("El monto a retirar debe ser mayor a 0");
-        }
-
-        if (monto > saldo)
-        {
-            throw new InvalidOperationException("El saldo es insuficiente para realizar el retiro");
-        }
-        saldo -= monto;
+        historial.AgregarMovimiento(movimiento);
     }
 }
