@@ -1,40 +1,43 @@
+﻿using System;
 using BilleteraVirtual.Dominio;
+using Xunit;
 
 namespace BilleteraVirtual.Tests.Dominio;
 
 public class HistorialMovimientosTests
 {
+    // Caso Normal: Agregar y consultar movimientos
     [Fact]
-    public void ObtenerMovimientos_EnHistorialNuevo_DevuelveListaVacia()
+    public void AgregarMovimiento_MovimientoValido_LoGuardaEnElHistorial()
     {
         var historial = new HistorialMovimientos();
+        var billetera = new Billetera();
+        var carga = new Carga(billetera, 1000m);
+
+        historial.AgregarMovimiento(carga);
 
         var movimientos = historial.ObtenerMovimientos();
-
-        Assert.Empty(movimientos);
+        Assert.Single(movimientos);
+        Assert.Same(carga, movimientos[0]);
     }
 
+    // Caso Borde: Ordenar historial sin movimientos devuelve lista vacía
     [Fact]
-    public void AgregarMovimiento_AgregaMovimientoAlHistorial()
+    public void OrdenarPorFechaDescendente_HistorialVacio_DevuelveListaVacia()
     {
         var historial = new HistorialMovimientos();
-        var movimiento = new Carga(1, 100m, new Billetera());
 
-        historial.AgregarMovimiento(movimiento);
+        var ordenados = historial.OrdenarPorFechaDescendente();
 
-        Assert.Same(movimiento, Assert.Single(historial.ObtenerMovimientos()));
+        Assert.Empty(ordenados);
     }
 
+    // Caso de Error: Intentar agregar un movimiento nulo
     [Fact]
-    public void ObtenerMovimientos_AlModificarLaListaDevuelta_NoModificaHistorial()
+    public void AgregarMovimiento_Nulo_LanzaArgumentNullException()
     {
         var historial = new HistorialMovimientos();
-        var movimiento = new Carga(1, 100m, new Billetera());
-        historial.AgregarMovimiento(movimiento);
 
-        var movimientos = historial.ObtenerMovimientos();
-        movimientos.Clear();
-
-        Assert.Single(historial.ObtenerMovimientos());
+        Assert.Throws<ArgumentNullException>(() => historial.AgregarMovimiento(null!));
     }
 }
