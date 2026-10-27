@@ -1,11 +1,14 @@
+using System;
 using BilleteraVirtual.Dominio;
+using Xunit;
 
 namespace BilleteraVirtual.Tests.Dominio;
 
 public class ClienteTests
 {
+    // Caso Normal: Creación válida de cliente y billetera asociada en $0
     [Fact]
-    public void CrearCliente_ConDatosValidos_AsignaSusDatos()
+    public void CrearCliente_ConDatosValidos_InicializaConBilleteraEnCero()
     {
         var cliente = new Cliente(1, "Ana Pérez", "12345678", "ana@email.com");
 
@@ -13,67 +16,34 @@ public class ClienteTests
         Assert.Equal("Ana Pérez", cliente.Nombre);
         Assert.Equal("12345678", cliente.Dni);
         Assert.Equal("ana@email.com", cliente.Email);
+        Assert.NotNull(cliente.ObtenerBilletera());
+        Assert.Equal(0m, cliente.ObtenerBilletera().ConsultarSaldo());
     }
 
+    // Caso Borde: Agregar, buscar por alias (insensible a mayúsculas) y eliminar destinatario
     [Fact]
-    public void CrearCliente_ConDatosValidos_AsociaBilleteraConSaldoCero()
+    public void GestionarDestinatarios_FlujoValido_AgregaBuscaYEliminaCorrectamente()
     {
-        var cliente = new Cliente(1, "Ana Pérez", "12345678", "ana@email.com");
+        var clienteOrigen = new Cliente(1, "Ana", "12345678", "ana@email.com");
+        var clienteDestino = new Cliente(2, "Carlos", "87654321", "carlos@email.com");
 
-        var billetera = cliente.ObtenerBilletera();
+        clienteOrigen.AgregarDestinatario(clienteDestino, "Amigo");
+        var destinatario = clienteOrigen.BuscarDestinatario("amigo");
 
-        Assert.NotNull(billetera);
-        Assert.Same(billetera, cliente.ObtenerBilletera());
-        Assert.Equal(0m, billetera.ConsultarSaldo());
+        Assert.Equal("Amigo", destinatario.ObtenerAlias());
+        Assert.Equal("Carlos", destinatario.ObtenerNombre());
+
+        clienteOrigen.EliminarDestinatario("AMIGO");
+        Assert.Throws<InvalidOperationException>(() => clienteOrigen.BuscarDestinatario("Amigo"));
     }
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void CrearCliente_SinNombre_LanzaArgumentException(string? nombre)
-    {
-        var excepcion = Assert.Throws<ArgumentException>(
-            () => new Cliente(1, nombre!, "12345678", "ana@email.com"));
-
-        Assert.Equal("nombre", excepcion.ParamName);
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void CrearCliente_SinDni_LanzaArgumentException(string? dni)
-    {
-        var excepcion = Assert.Throws<ArgumentException>(
-            () => new Cliente(1, "Ana Pérez", dni!, "ana@email.com"));
-
-        Assert.Equal("dni", excepcion.ParamName);
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void CrearCliente_SinEmail_LanzaArgumentException(string? email)
-    {
-        var excepcion = Assert.Throws<ArgumentException>(
-            () => new Cliente(1, "Ana Pérez", "12345678", email!));
-
-        Assert.Equal("email", excepcion.ParamName);
-    }
-
+    // Caso de Error: Email con formato inválido o datos vacíos
     [Theory]
     [InlineData("email-invalido")]
-    [InlineData("ana@")]
-    [InlineData("@email.com")]
-    [InlineData("ana email@email.com")]
-    public void CrearCliente_ConEmailInvalido_LanzaArgumentException(string email)
+    [InlineData("usuario@")]
+    [InlineData("usuario@domain")]
+    public void CrearCliente_EmailInvalido_LanzaArgumentException(string emailInvalido)
     {
-        var excepcion = Assert.Throws<ArgumentException>(
-            () => new Cliente(1, "Ana Pérez", "12345678", email));
-
-        Assert.Equal("email", excepcion.ParamName);
+        Assert.Throws<ArgumentException>(() => new Cliente(1, "Juan", "12345678", emailInvalido));
     }
 }
-

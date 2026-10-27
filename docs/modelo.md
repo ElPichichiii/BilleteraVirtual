@@ -27,11 +27,9 @@ class Cliente {
 
 class Billetera {
     -decimal saldo
-    -HistorialMovimientos historial
 
     +decimal ConsultarSaldo()
     +void CargarDinero(decimal monto)
-    +List~Movimiento~ ObtenerMovimientos()
     +void Transferir(Billetera destino, decimal monto)
     +bool TieneSaldoSuficiente(decimal monto)
     +bool MontoDentroDelLimite(decimal monto)
