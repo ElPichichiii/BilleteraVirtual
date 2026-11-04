@@ -95,7 +95,7 @@ public class Cliente
 
     private static void ValidarFormatoEmail(string email)
     {
-        if (!MailAddress.TryCreate(email, out var direccion) || direccion.Address != email)
+        if (!MailAddress.TryCreate(email, out var direccion) || direccion.Address != email || !direccion.Host.Contains("."))
         {
             throw new ArgumentException("El email tiene un formato inválido.", nameof(email));
         }
