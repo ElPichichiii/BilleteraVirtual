@@ -43,4 +43,41 @@ public class BilleteraTests
         Assert.Equal(100m, origen.ConsultarSaldo());
         Assert.Equal(0m, destino.ConsultarSaldo());
     }
+
+
+
+    // Caso Normal: Asignación automática de CVU y Alias al instanciar la billetera
+    [Fact]
+    public void Constructor_AsignaCvuYAliasPorDefecto()
+    {
+        var billetera = new Billetera();
+
+        Assert.Equal(22, billetera.Cvu.Length);
+        Assert.NotNull(billetera.Alias);
+    }
+
+    // Caso Normal: Cambiar el Alias por uno válido actualiza la propiedad
+    [Fact]
+    public void CambiarAlias_AliasValido_ActualizaAlias()
+    {
+        var billetera = new Billetera();
+
+        billetera.CambiarAlias("alias.valido.mp");
+
+        Assert.Equal("alias.valido.mp", billetera.Alias);
+    }
+
+    // Caso de Error: Intentar asignar un Alias con formato inválido lanza ArgumentException
+    [Theory]
+    [InlineData("")]
+    [InlineData("abc")] // Menos de 6 caracteres
+    [InlineData(".alias.incorrecto")]
+    [InlineData("alias..incorrecto")]
+    public void CambiarAlias_AliasInvalido_LanzaArgumentException(string aliasInvalido)
+    {
+        var billetera = new Billetera();
+
+        Assert.Throws<ArgumentException>(() => billetera.CambiarAlias(aliasInvalido));
+    }
+
 }
