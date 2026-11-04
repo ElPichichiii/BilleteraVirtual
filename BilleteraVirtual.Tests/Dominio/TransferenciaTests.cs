@@ -18,7 +18,7 @@ public class TransferenciaTests
 
         Assert.Equal(3000m, origen.ConsultarSaldo());
         Assert.Equal(2000m, destino.ConsultarSaldo());
-        Assert.Single(origen.ObtenerMovimientos());
+        Assert.Equal(2, origen.ObtenerMovimientos().Count);
         Assert.Single(destino.ObtenerMovimientos());
     }
 
