@@ -89,4 +89,10 @@ public class Billetera
     {
         this.historial.AgregarMovimiento(movimiento);
     }
+
+    public void TransferirPorIdentificador(string aliasOCvu, decimal monto, RepositorioBilleteras repositorio)
+    {
+        var destino = repositorio.BuscarPorIdentificador(aliasOCvu);
+        this.Transferir(destino, monto);
+    }
 }

@@ -45,7 +45,6 @@ public class BilleteraTests
     }
 
 
-
     // Caso Normal: Asignación automática de CVU y Alias al instanciar la billetera
     [Fact]
     public void Constructor_AsignaCvuYAliasPorDefecto()
@@ -80,4 +79,48 @@ public class BilleteraTests
         Assert.Throws<ArgumentException>(() => billetera.CambiarAlias(aliasInvalido));
     }
 
+
+    // Caso Normal: Transferir por Alias o CVU a una cuenta existente
+    [Fact]
+    public void TransferirPorIdentificador_CuentaExistente_RealizaTransferencia()
+    {
+        var repo = new RepositorioBilleteras();
+        var origen = new Billetera();
+        var destino = new Billetera();
+        
+        repo.Agregar(origen);
+        repo.Agregar(destino);
+        origen.CargarDinero(2000m);
+
+        origen.TransferirPorIdentificador(destino.Alias, 500m, repo);
+
+        Assert.Equal(1500m, origen.ConsultarSaldo());
+        Assert.Equal(500m, destino.ConsultarSaldo());
+    }
+
+    // Caso de Error: Buscar o transferir a un Alias/CVU inexistente lanza InvalidOperationException y no altera saldos
+    [Fact]
+    public void TransferirPorIdentificador_CuentaInexistente_LanzaInvalidOperationExceptionYNoAlteraSaldo()
+    {
+        var repo = new RepositorioBilleteras();
+        var origen = new Billetera();
+        repo.Agregar(origen);
+        origen.CargarDinero(1000m);
+
+        Assert.Throws<InvalidOperationException>(() => 
+            origen.TransferirPorIdentificador("alias.inexistente.mp", 300m, repo));
+
+        Assert.Equal(1000m, origen.ConsultarSaldo());
+    }
+
+    // Caso de Error: Identificador vacío o nulo lanza ArgumentException
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void BuscarPorIdentificador_IdentificadorVacio_LanzaArgumentException(string identificadorInvalido)
+    {
+        var repo = new RepositorioBilleteras();
+
+        Assert.Throws<ArgumentException>(() => repo.BuscarPorIdentificador(identificadorInvalido));
+    }
 }
