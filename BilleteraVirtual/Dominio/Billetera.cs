@@ -74,6 +74,15 @@ public class Billetera
         transferencia.Ejecutar();
     }
 
+
+    public void RealizarTransferenciaExterna(decimal monto, string cbuDestino)
+    {
+        var transferenciaExterna = new TransferenciaExterna(this, monto, cbuDestino);
+        transferenciaExterna.Ejecutar();
+    }
+
+
+
     // Métodos internos (Acceso restringido al ensamblado de Dominio) 
     internal void Acreditar(decimal monto)
     {
