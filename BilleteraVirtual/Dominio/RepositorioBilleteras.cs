@@ -12,9 +12,46 @@ public class RepositorioBilleteras
 
     public void Agregar(Billetera billetera)
     {
-        if (billetera == null) throw new ArgumentNullException(nameof(billetera));
-        billeteras.Add(billetera);
+        if (billetera == null)
+        {
+            throw new ArgumentNullException(nameof(billetera), "La billetera no puede ser nula.");
+        }
+
+        
+        if (this.billeteras.Any(b => b.Cvu.Equals(billetera.Cvu, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidOperationException($"Ya existe una billetera registrada con el CVU '{billetera.Cvu}'.");
+        }
+
+        if (this.billeteras.Any(b => b.Alias.Equals(billetera.Alias, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidOperationException($"Ya existe una billetera registrada con el Alias '{billetera.Alias}'.");
+        }
+
+        this.billeteras.Add(billetera);
     }
+
+    public void CambiarAlias(Billetera billetera, string nuevoAlias)
+    {
+        if (billetera == null)
+        {
+            throw new ArgumentNullException(nameof(billetera), "La billetera no puede ser nula.");
+        }
+
+        
+        bool aliasOcupado = this.billeteras
+            .Where(b => b != billetera) 
+            .Any(b => b.Alias.Equals(nuevoAlias, StringComparison.OrdinalIgnoreCase));
+
+        if (aliasOcupado)
+        {
+            throw new InvalidOperationException($"El Alias '{nuevoAlias}' ya se encuentra registrado por otra cuenta.");
+        }
+
+       
+        billetera.CambiarAlias(nuevoAlias);
+    }
+
 
     public Billetera BuscarPorIdentificador(string aliasOCvu)
     {
