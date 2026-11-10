@@ -95,4 +95,25 @@ public class Billetera
         var destino = repositorio.BuscarPorIdentificador(aliasOCvu);
         this.Transferir(destino, monto);
     }
+
+
+    // Propiedad o validación de estado de deuda integrada en la entidad Billetera
+    private bool poseeDeudasPendientes = false;
+
+    public bool PoseeDeudasPendientes()
+    {
+        return this.poseeDeudasPendientes;
+    }
+
+    public void EstablecerDeudasPendientes(bool poseeDeudas)
+    {
+        this.poseeDeudasPendientes = poseeDeudas;
+    }
+
+    // Método PagarEnCuotas() expuesto en Billetera.cs
+    public void PagarEnCuotas(decimal montoTotal, int cantidadCuotas)
+    {
+        var pago = new PagoEnCuotas(this, montoTotal, cantidadCuotas);
+        pago.Ejecutar();
+    }
 }
