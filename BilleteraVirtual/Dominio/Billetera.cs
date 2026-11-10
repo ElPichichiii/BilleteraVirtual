@@ -104,4 +104,24 @@ public class Billetera
         var destino = repositorio.BuscarPorIdentificador(aliasOCvu);
         this.Transferir(destino, monto);
     }
+
+    // Estado y métodos para manejar deudas
+    private bool poseeDeudasPendientes = false;
+
+    public bool PoseeDeudasPendientes()
+    {
+        return this.poseeDeudasPendientes;
+    }
+
+    public void EstablecerDeudasPendientes(bool poseeDeudas)
+    {
+        this.poseeDeudasPendientes = poseeDeudas;
+    }
+
+    // Método público para iniciar el pago en cuotas
+    public void PagarEnCuotas(decimal montoBase, int cantidadCuotas)
+    {
+        var pago = new PagoEnCuotas(this, montoBase, cantidadCuotas);
+        pago.Ejecutar();
+    }
 }
