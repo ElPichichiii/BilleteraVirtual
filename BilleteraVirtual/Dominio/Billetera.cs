@@ -105,8 +105,7 @@ public class Billetera
         this.Transferir(destino, monto);
     }
 
-
-    // Propiedad o validación de estado de deuda integrada en la entidad Billetera
+    // Estado y métodos para manejar deudas
     private bool poseeDeudasPendientes = false;
 
     public bool PoseeDeudasPendientes()
@@ -119,10 +118,10 @@ public class Billetera
         this.poseeDeudasPendientes = poseeDeudas;
     }
 
-    // Método PagarEnCuotas() expuesto en Billetera.cs
-    public void PagarEnCuotas(decimal montoTotal, int cantidadCuotas)
+    // Método público para iniciar el pago en cuotas
+    public void PagarEnCuotas(decimal montoBase, int cantidadCuotas)
     {
-        var pago = new PagoEnCuotas(this, montoTotal, cantidadCuotas);
+        var pago = new PagoEnCuotas(this, montoBase, cantidadCuotas);
         pago.Ejecutar();
     }
 }

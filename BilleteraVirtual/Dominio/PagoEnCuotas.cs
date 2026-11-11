@@ -1,61 +1,64 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System;
 
 namespace BilleteraVirtual.Dominio;
 
 public class PagoEnCuotas : Movimiento
 {
-    private Billetera billetera;
-    private int cantidadCuotas;
+    private readonly Billetera billetera;
 
-    public int CantidadCuotas => this.cantidadCuotas;
+    public int CantidadCuotas { get; }
+    public decimal MontoBase { get; }
+    public decimal PorcentajeInteres { get; }
+    public decimal ValorCuota => this.Monto / this.CantidadCuotas;
 
-    public PagoEnCuotas(Billetera billetera, decimal montoTotal, int cantidadCuotas) : base(montoTotal)
+    public PagoEnCuotas(Billetera billetera, decimal montoBase, int cantidadCuotas)
+        : base(CalcularMontoTotal(montoBase, cantidadCuotas))
     {
-        this.billetera = billetera ?? throw new ArgumentNullException(nameof(billetera), "La billetera no puede ser nula.");
-        this.cantidadCuotas = cantidadCuotas;
+        this.billetera = billetera ?? throw new ArgumentNullException(nameof(billetera));
+        this.MontoBase = montoBase;
+        this.CantidadCuotas = cantidadCuotas;
+        this.PorcentajeInteres = ObtenerPorcentajeInteres(cantidadCuotas);
+    }
+
+    private static decimal ObtenerPorcentajeInteres(int cuotas) => cuotas switch
+    {
+        2 => 0.05m,  // 5%
+        3 => 0.10m,  // 10%
+        6 => 0.25m,  // 25%
+        12 => 0.50m, // 50%
+        _ => throw new ArgumentException($"El plan de {cuotas} cuotas no es válido. Usar: 2, 3, 6 o 12.", nameof(cuotas))
+    };
+
+    private static decimal CalcularMontoTotal(decimal montoBase, int cuotas)
+    {
+        if (montoBase <= 0)
+        {
+            throw new ArgumentException("El monto debe ser mayor a cero.", nameof(montoBase));
+        }
+
+        return montoBase * (1m + ObtenerPorcentajeInteres(cuotas));
     }
 
     protected override void Validar()
     {
-        // Validar que la cantidad de cuotas sea válida (mayor a 0)
-        if (this.cantidadCuotas <= 0)
-        {
-            throw new ArgumentException("La cantidad de cuotas debe ser mayor a cero.", nameof(this.cantidadCuotas));
-        }
-
-        if (this.Monto <= 0)
-        {
-            throw new ArgumentException("El monto total del pago debe ser mayor a cero.", nameof(this.Monto));
-        }
-
-        //Validar que el usuario no posea deudas pendientes activas (lanza InvalidOperationException)
         if (this.billetera.PoseeDeudasPendientes())
         {
-            throw new InvalidOperationException("No se puede realizar el pago en cuotas porque posee deudas pendientes activas.");
+            throw new InvalidOperationException("No se puede pagar en cuotas si posee deudas activas.");
         }
 
-        //Validar que la billetera cuente con saldo suficiente (lanza InvalidOperationException)
         if (!this.billetera.TieneSaldoSuficiente(this.Monto))
         {
-            throw new InvalidOperationException("La billetera no posee saldo suficiente para cubrir la operación.");
+            throw new InvalidOperationException("Saldo insuficiente para cubrir el pago total con intereses.");
         }
     }
 
     protected override void Aplicar()
     {
-        //Debitar el saldo correspondiente
         this.billetera.Debitar(this.Monto);
     }
 
     protected override void Registrar()
     {
-        //Registrar la operación en el HistorialMovimientos con tipo "Pago en Cuotas"
         this.billetera.RegistrarMovimiento(this);
     }
 
