@@ -8,7 +8,7 @@ Sistema de gestión de billetera virtual desarrollado en C# y .NET, implementand
 
 Para explorar la estructura completa de clases, los flujos de secuencia de las operaciones y la justificación de las decisiones de diseño, haz clic en el siguiente enlace:
 
-👉 **[Ver Modelo de Dominio y Diagramas](./documentos/modelo.md)**
+[Ver Modelo de Dominio](./docs/modelo.md)
 
 ---
 
