@@ -3,6 +3,9 @@
 
 namespace BilleteraVirtual.Dominio;
 
+
+
+
 public class Billetera
 {
     private decimal saldo;
@@ -123,5 +126,44 @@ public class Billetera
     {
         var pago = new PagoEnCuotas(this, montoBase, cantidadCuotas);
         pago.Ejecutar();
+    }
+
+    // Plan de cuotas en curso (solo puede haber uno: mientras exista, la billetera posee deuda pendiente)
+    private PagoEnCuotas? planDeCuotas;
+
+    internal void IniciarPlanDeCuotas(PagoEnCuotas plan)
+    {
+        this.planDeCuotas = plan;
+        this.poseeDeudasPendientes = true;
+    }
+
+    public int CuotasPendientes()
+    {
+        return this.planDeCuotas?.CuotasRestantes ?? 0;
+    }
+
+    // Debita la siguiente cuota del plan en curso. Al pagar la última, se cancela la deuda.
+    public void PagarCuota()
+    {
+        if (this.planDeCuotas is null)
+        {
+            throw new InvalidOperationException("No hay ningún pago en cuotas pendiente.");
+        }
+
+        decimal montoCuota = this.planDeCuotas.ObtenerMontoProximaCuota();
+
+        if (!this.TieneSaldoSuficiente(montoCuota))
+        {
+            throw new InvalidOperationException("La billetera no posee saldo suficiente para pagar la cuota.");
+        }
+
+        this.Debitar(montoCuota);
+        this.planDeCuotas.RegistrarCuotaPagada();
+
+        if (this.planDeCuotas.CuotasRestantes == 0)
+        {
+            this.planDeCuotas = null;
+            this.poseeDeudasPendientes = false;
+        }
     }
 }
