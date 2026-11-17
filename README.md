@@ -26,7 +26,7 @@ Para explorar la estructura completa de clases, los flujos de secuencia de las o
 ## 🛠️ Tecnologías y Ejecución
 
 * **Framework**: .NET 9.0 (C#)
-* **Testing**: xUnit (47 pruebas unitarias automatizadas)
+* **Testing**: xUnit (**66 pruebas unitarias automatizadas**, con casos normales, borde y de error)
 
 Para ejecutar la suite de pruebas desde la raíz del proyecto:
 ```bash
